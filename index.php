@@ -8,14 +8,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <title>C.S.V.E</title>
 </head>
 
+<header>
+    <!-- タイトルと説明 -->
+    <h1 id='aboutTitle' class='title'>C.S.V.E</h1>
+    <p id='aboutCsve'>online CSV Editor</p>
+    <button id=readCsvBtn>CSV読み込み</button>
+    <button id=localSaveBtn>一時保存</button>
+    <button id=localSaveReadBtn>再読み込み</button>
+    <button id=localSaveClearBtn>クリア</button>
+    <button id=csvDownLoadBtn>ダウンロード</button>
+</header>
+
 <body>
-    <h1>C.S.V.E</h1>
-    <!-- <button >作成</button> -->
-    <div id='createTable'></div>
+    <div class='tableArea' id='createTable'></div>
 </body>
 
 <footer>
@@ -26,11 +36,13 @@
     // CSVデータの元データ [row][col]
     //
     let csvArray = [
-        ['-----', '-----', '-----', '列削除', '列削除', '列削除', '列削除'],
-        ['-----', '-----', '-----', '列追加', '列追加', '列追加', '列追加'],
-        ['-----', '-----', '-----', '----0', '----1', '----2', '----3'],
-        ['行削除', '行追加', '----0', '---aa', '---ab', '---ac', '---ad'],
-        ['行削除', '行追加', '----1', '---ba', '---bb', '---bc', '---bd'],
+        ['-----', '-----', '-----', '列削除', '列削除', '列削除', '列削除', '列削除'],
+        ['-----', '-----', '-----', '列追加', '列追加', '列追加', '列追加', '列削除'],
+        ['-----', '-----', '-----', '----0', '----1', '----2', '----3', '----4'],
+        ['行削除', '行追加', '----0', '---aa', '---ab', '---ac', '---ad', '---ae'],
+        ['行削除', '行追加', '----1', '---ba', '---bb', '---bc', '---bd', '---be'],
+        ['行削除', '行追加', '----2', '---ca', '---cb', '---cc', '---cd', '---ce'],
+        ['行削除', '行追加', '----3', '---da', '---db', '---dc', '---dd', '---de'],
     ];
 
     //
@@ -92,7 +104,7 @@
 
             //実際のCSVデータ
             for (col = 3; col < csvArray[row].length; col++) {
-                htmlTxt += `<td><form action = "" name = ${row}_${col}><input type = "text" value=${csvArray[row][col]}> </form></td>`;
+                htmlTxt += `<td><form action = "" name = ${row}_${col}><input type = "text" id="form_${row}_${col}" value=${csvArray[row][col]}> </form></td>`;
             }
 
             htmlTxt += `</tr>`;
@@ -104,7 +116,9 @@
         $('#createTable').html(htmlTxt);
     }
 
+    //
     // 列削除ボタン押下イベント
+    //
     $('#createTable').on('click', 'button[name="colDelBtn"]', function() {
         //削除する列は
         let colNo = $(this).val();
@@ -116,7 +130,9 @@
         }
         createHtmlFromCsv();
     });
+    //
     // 列追加ボタン押下イベント
+    //
     $('#createTable').on('click', 'button[name="colAddBtn"]', function() {
         //追加する列は
         let colNo = $(this).val();
@@ -127,9 +143,11 @@
             let resultAry = csvArray[rowNo].splice(colNo, 0, "");
         }
         createHtmlFromCsv();
-
     });
+
+    //
     // 行削除ボタン押下イベント
+    //
     $('#createTable').on('click', 'button[name="rowDelBtn"]', function() {
         //削除する行は
         let rowNo = $(this).val();
@@ -139,7 +157,10 @@
         let resultAry = csvArray.splice(rowNo, 1);
         createHtmlFromCsv();
     });
+
+    //
     // 列追加ボタン押下イベント
+    //
     $('#createTable').on('click', 'button[name="rowAddBtn"]', function() {
         //追加する行は
         let rowNo = $(this).val();
@@ -151,8 +172,60 @@
             newRow.push("");
         }
         let resultAry = csvArray.splice(rowNo, 0, newRow);
+
+        //CSVデータからHTMLテーブル作成
         createHtmlFromCsv();
     });
+
+    //
+    // 一時保存ボタン押下イベント
+    //
+    $('#localSaveBtn').on('click', function() {
+        //フォームの値を配列に保存
+        for (let rowNo = 3; rowNo < csvArray.length; rowNo++) {
+            for (let colNo = 3; colNo < csvArray[rowNo].length; colNo++) {
+                csvArray[rowNo][colNo] = $(`#form_${rowNo}_${colNo}`).val();
+            }
+        }
+        //ローカルストレージに保存
+        const csvArrayJson = JSON.stringify(csvArray);
+        localStorage.setItem('csvdata', csvArrayJson);
+    });
+
+    //
+    // 再読み込みボタン押下イベント
+    //
+    $('#localSaveReadBtn').on('click', function() {
+        //ローカルストレージから読み出し
+        if (localStorage.getItem('csvdata')) {
+            const csvArrayJson = localStorage.getItem('csvdata')
+            csvArray = JSON.parse(csvArrayJson);
+        }
+        //CSVデータからHTMLテーブル作成
+        createHtmlFromCsv();
+    });
+
+    //
+    // クリアボタン押下イベント
+    //
+    $('#localSaveClearBtn').on('click', function() {
+        //ローカルストレージからクリア
+        if (localStorage.getItem('csvdata')) {
+            localStorage.clear('csvdata')
+        }
+        //CSVデータからHTMLテーブル作成
+        createHtmlFromCsv();
+    });
+
+    //
+    // 初回読み込み動作
+    //
+
+    //ローカルストレージから読み出し
+    if (localStorage.getItem('csvdata')) {
+        const csvArrayJson = localStorage.getItem('csvdata')
+        csvArray = JSON.parse(csvArrayJson);
+    }
 
     //CSVデータからHTMLテーブル作成
     createHtmlFromCsv();
