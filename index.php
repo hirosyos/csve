@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <title>C.S.V.E</title>
 </head>
 
@@ -177,10 +178,7 @@
         createHtmlFromCsv();
     });
 
-    //
-    // 一時保存ボタン押下イベント
-    //
-    $('#localSaveBtn').on('click', function() {
+    function saveLocalStrage() {
         //フォームの値を配列に保存
         for (let rowNo = 3; rowNo < csvArray.length; rowNo++) {
             for (let colNo = 3; colNo < csvArray[rowNo].length; colNo++) {
@@ -190,6 +188,23 @@
         //ローカルストレージに保存
         const csvArrayJson = JSON.stringify(csvArray);
         localStorage.setItem('csvdata', csvArrayJson);
+    }
+    //
+    // 一時保存ボタン押下イベント
+    //
+    $('#localSaveBtn').on('click', function() {
+        // //フォームの値を配列に保存
+        // for (let rowNo = 3; rowNo < csvArray.length; rowNo++) {
+        //     for (let colNo = 3; colNo < csvArray[rowNo].length; colNo++) {
+        //         csvArray[rowNo][colNo] = $(`#form_${rowNo}_${colNo}`).val();
+        //     }
+        // }
+        // //ローカルストレージに保存
+        // const csvArrayJson = JSON.stringify(csvArray);
+        // localStorage.setItem('csvdata', csvArrayJson);
+
+        //ローカルストレージに保存
+        saveLocalStrage();
     });
 
     //
@@ -215,6 +230,41 @@
         }
         //CSVデータからHTMLテーブル作成
         createHtmlFromCsv();
+    });
+
+    //
+    // ダウンロードボタン押下イベント
+    //
+    $('#csvDownLoadBtn').on('click', function() {
+        //ローカルストレージに保存
+        saveLocalStrage();
+        //読み出し
+        const csvArrayJson = localStorage.getItem('csvdata')
+        //PHPに処理を渡す
+        axios.post('./create.php', csvArrayJson)
+            .then(function(response) {
+                console.log('ok!');
+                // // リクエスト成功時の処理(responseに結果が入っている)
+                // console.log(response.data.items);
+                // const booksArray = response.data.items;
+                // const titleArray = [];
+                // for (let i = 0; i < 10; i++) {
+                //     console.log(booksArray[i].volumeInfo.title);
+                //     // titleArray.push('<p>' + booksArray[i].volumeInfo.title + '</p>');
+                //     titleArray.push(`<p>${booksArray[i].volumeInfo.title}</p>`);
+                //     // titleArray = `<a href="${booksArray[i].volumeInfo.infoLink}"
+                //     //                 <p>${booksArray[i].volumeInfo.title}</p>
+                //     //               </a>`;
+                // }
+                // $('#output').html(titleArray);
+            }).catch(function(error) {
+                // リクエスト失敗時の処理(errorにエラー内容が入っている)
+                console.log(error);
+            }).finally(function() {
+                // 成功失敗に関わらず必ず実行
+                console.log('done!');
+            });
+
     });
 
     //
