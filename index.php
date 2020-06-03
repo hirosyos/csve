@@ -29,8 +29,8 @@
         ['-----', '-----', '-----', '列削除', '列削除', '列削除', '列削除'],
         ['-----', '-----', '-----', '列追加', '列追加', '列追加', '列追加'],
         ['-----', '-----', '-----', '----0', '----1', '----2', '----3'],
-        ['行削除', '行追加', '----0', '-----', '-----', '-----', '-----'],
-        ['行削除', '行追加', '----1', '-----', '-----', '-----', '-----'],
+        ['行削除', '行追加', '----0', '---aa', '---ab', '---ac', '---ad'],
+        ['行削除', '行追加', '----1', '---ba', '---bb', '---bc', '---bd'],
     ];
 
     //
@@ -52,7 +52,7 @@
         }
         for (col = 3; col < csvArray[0].length; col++) {
             //列削除ボタン
-            htmlTxt += `<th><button>列削除</button></th>`;
+            htmlTxt += `<th><button name='colDelBtn' id='colDelBtn_${col}' value='${col}'>列削除</button></th>`;
         }
         //
         // 1行目 列追加ボタン
@@ -63,7 +63,7 @@
         }
         for (col = 3; col < csvArray[1].length; col++) {
             //列追加ボタン
-            htmlTxt += `<th><button>列追加</button></th>`;
+            htmlTxt += `<th><button name='colAddBtn' id='colAddBtn_${col}' value='${col}'>列追加</button></th>`;
         }
         //
         // 2行目 列インデックス
@@ -82,17 +82,17 @@
         for (row = 3; row < csvArray.length; row++) {
             htmlTxt += `<tr>`;
             //行削除ボタン
-            htmlTxt += `<th><button>行削除</button></th>`;
+            htmlTxt += `<th><button name='rowDelBtn' id='rowDelBtn_${row}' value='${row}'>行削除</button></th>`;
 
             //行追加ボタン
-            htmlTxt += `<th><button>行追加</button></th>`;
+            htmlTxt += `<th><button name='rowAddBtn' id='rowAddBtn_${row}' value='${row}'>行追加</button></th>`;
 
             //行インデックス
             htmlTxt += `<th>${row-2}</th>`;
 
             //実際のCSVデータ
             for (col = 3; col < csvArray[row].length; col++) {
-                htmlTxt += `<td><form action = "" name = ${row}_${col}><input type = "text" > </form></td>`;
+                htmlTxt += `<td><form action = "" name = ${row}_${col}><input type = "text" value=${csvArray[row][col]}> </form></td>`;
             }
 
             htmlTxt += `</tr>`;
@@ -103,6 +103,56 @@
 
         $('#createTable').html(htmlTxt);
     }
+
+    // 列削除ボタン押下イベント
+    $('#createTable').on('click', 'button[name="colDelBtn"]', function() {
+        //削除する列は
+        let colNo = $(this).val();
+        console.log(`削除する列は${colNo}`);
+
+        //列削除
+        for (let rowNo = 0; rowNo < csvArray.length; rowNo++) {
+            let resultAry = csvArray[rowNo].splice(colNo, 1);
+        }
+        createHtmlFromCsv();
+    });
+    // 列追加ボタン押下イベント
+    $('#createTable').on('click', 'button[name="colAddBtn"]', function() {
+        //追加する列は
+        let colNo = $(this).val();
+        console.log(`追加する列は${colNo}`);
+
+        //列追加
+        for (let rowNo = 0; rowNo < csvArray.length; rowNo++) {
+            let resultAry = csvArray[rowNo].splice(colNo, 0, "");
+        }
+        createHtmlFromCsv();
+
+    });
+    // 行削除ボタン押下イベント
+    $('#createTable').on('click', 'button[name="rowDelBtn"]', function() {
+        //削除する行は
+        let rowNo = $(this).val();
+        console.log(`削除する行は${rowNo}`);
+
+        //行削除
+        let resultAry = csvArray.splice(rowNo, 1);
+        createHtmlFromCsv();
+    });
+    // 列追加ボタン押下イベント
+    $('#createTable').on('click', 'button[name="rowAddBtn"]', function() {
+        //追加する行は
+        let rowNo = $(this).val();
+        console.log(`削除する行は${rowNo}`);
+
+        //行追加
+        let newRow = [];
+        for (let colNo = 0; colNo < csvArray[rowNo].length; colNo++) {
+            newRow.push("");
+        }
+        let resultAry = csvArray.splice(rowNo, 0, newRow);
+        createHtmlFromCsv();
+    });
 
     //CSVデータからHTMLテーブル作成
     createHtmlFromCsv();
