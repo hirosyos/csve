@@ -23,9 +23,9 @@ $file = fopen("data/${filename}.csv", 'a');
 flock($file, LOCK_EX);
 
 // ファイル書き込み処理
-for ($row = 3; $row < count($contents); $row++) {
-    for ($col = 3; $col < count($contents[$row]); $col++) {
-        fwrite($file, "\"{$contents[$row][$col]}\" ,");
+for ($row = 0; $row < count($contents); $row++) {
+    for ($col = 0; $col < count($contents[$row]); $col++) {
+        fwrite($file, "{$contents[$row][$col]} ,");
     }
     fwrite($file, "\n");
 }
